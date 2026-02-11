@@ -11,17 +11,17 @@ api = ApiOpenWatherMap(api_key=api_key)
 api_response, api_data = api.get(city_name=city_name)
 
 jdata = json.dumps(api_data, indent=4) # only for visualizzation:
-
+print(jdata)
 
 ## get data:
 #  coord:
 lon = api_data.get('coord').get('lon')
 lat = api_data.get('coord').get('lat')
 # wather:
-id = api_data.get('weather').get('id')
-main = api_data.get('weather').get('main')
-description = api_data.get('weather').get('description')
-icon = api_data.get('weather').get('icon')
+id = api_data.get('weather')[0].get('id')
+main = api_data.get('weather')[0].get('main')
+description = api_data.get('weather')[0].get('description')
+icon = api_data.get('weather')[0].get('icon')
 # base information:
 base = api_data.get('base')
 # main temperature:
@@ -52,8 +52,3 @@ timezone = api_data.get('timezone')
 city_id = api_data.get('id')
 city_name = api_data.get('name')
 api_code_response = api_data.get('cod')
-#
-
-
-
-
