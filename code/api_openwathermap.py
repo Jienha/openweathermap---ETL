@@ -12,7 +12,7 @@ class ApiOpenWatherMap():
         return (
             self.base_url +
             f"q=" + city_name + # City 
-            "&units=" + self.metric + # Celsius Temperature
+            "&units=" + self.metric + # Read documentation for more infomations
             "&appid=" + self.key
             )
 

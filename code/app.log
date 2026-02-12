@@ -1,0 +1,4 @@
+2026-02-13 01:16:08,317 - INFO - Applicazione avviata
+2026-02-13 01:16:08,330 - WARNING - Questo è un avviso
+2026-02-13 01:16:08,330 - ERROR - Si è verificato un errore
+2026-02-13 01:16:10,337 - WARNING - Non esistono i campi di weather
