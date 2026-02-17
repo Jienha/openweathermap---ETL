@@ -9,46 +9,33 @@ class OpenWeatherMapParser:
         self.data_raw = data_raw
         self.missing_data = 0
         self.where_missing_data = []
+        self._return_vals = {}
 
-    def _get_coords(self, root_name='coord', error_value=404) -> dict:
-        """
-        Parsing the Open-Weather-Map's coodinates information.
-        Geocoords (lat, lon) can't be exist outside determinate values (-90<=lat<=90, -180<=lon<=180).
+    def get_first_level_items(self, root_name:str, fields:dict, error_value=None):
 
-        Dive into the steps:
-            - check if Coord root exist: if yes ok, otherwise return lat, lon null
-            - if Coord exist check the lat and lon reliable
-        
-        :return: {lon:value, lat:value}
-        """
-        k1 = self.data_raw.get(root_name, 0)
+        k1 = self.data_raw.get(root_name, error_value)
+
+        max_errors = len(fields.keys())
 
         if k1 != 0 and isinstance(k1, dict):
-            lon = k1.get('lon', error_value)
-            lat = k1.get('lat', error_value)
 
-            # checking if lat, lon are reliable:
-             
-            if  isinstance(lon, float) == False or (lon > 180 or lon < -180):
-                lon = np.nan
-                self.missing_data += 1
-                self.where_missing_data.append(root_name+'.lon')
+            for field, field_type in fields.items():
 
-            if isinstance(lat, float) == False or (lat > 90 or lat < -90):
-                lat = np.nan
-                self.missing_data += 1
-                self.where_missing_data.append(root_name+'.lat')
-            
-            return {'lon':lon, 'lat':lat}
+                if isinstance(k1.get(field), field_type):
+                    self._return_vals[root_name + '_' + field] = k1.get(field)
+                else:
+                    self.missing_data += 1
+                    self.where_missing_data.append(root_name+'.'+field)
+                    self._return_vals[root_name + '_' + field] = np.nan
+        else:
+            self.missing_data += max_errors
+            for field, field_type in fields.items():
+                self.where_missing_data.append(root_name+'.'+field)
+                self._return_vals[root_name + '_' + field] = np.nan
         
-        # missing entire coodinates
-        else: 
-            self.missing_data += 2
-            self.where_missing_data.extend([root_name+'.lon', root_name+'.lat'])
-            return {'lon':np.nan, 'lat':np.nan}
+        return self._return_vals
         
-
-    def _get_wather(self, root_name='weather', error_value=404):
+    def get_first_level_items_customlist(self, root_name, fields:dict, error_value=None):
         """
         Docstring for _get_wather
         
@@ -57,70 +44,117 @@ class OpenWeatherMapParser:
         :param error_value: Default value used for check the filds values
         """
 
-        k1 = self.data_raw.get(root_name, 0)
+        k1 = self.data_raw.get(root_name, error_value)
 
-        FILDS = {'id':int, 'main':str, 'description':str, 'icon':str}
-
-        weather_vals = {}
+        max_errors = len(fields.keys())
 
         if k1 != 0 and isinstance(k1, list): # usually weather has list
 
             if len(k1) == 1 and isinstance(k1[0], dict):
                 
-                weather = k1[0]
+                k2 = k1[0]
 
-                for field, field_type in FILDS.items():
+                for field in k2.items():
 
-                    if weather.get(field, error_value) != error_value and isinstance(weather.get(field), field_type):
-                        weather_vals[root_name + '_' + field] = weather.get(field)
+                    if k2.get(field, error_value) != error_value and isinstance(k2.get(field), field_type):
+                        self._return_vals[root_name + '_' + field] = k2.get(field)
                     else:
                         self.missing_data += 1
                         self.where_missing_data.append(root_name+'.'+field)
-                        weather_vals[root_name + '_' + field] = np.nan
-                return weather_vals
+                        self._return_vals[root_name + '_' + field] = np.nan
+                return self._return_vals
             else:
-                
-                self.missing_data += 4
-                self.where_missing_data.extend([
-                    root_name+'.id', 
-                    root_name+'.main', 
-                    root_name+'.description', 
-                    root_name+'.icon'
-                ])
-                return {
-                    root_name + '_id': np.nan,
-                    root_name + '_main': np.nan,
-                    root_name + '_description': np.nan,
-                    root_name + '_icon': np.nan
-                }
+                self.missing_data += max_errors
+                for field, field_type in fields.items():
+                    self.where_missing_data.append(root_name+'.'+field)
+                    self._return_vals[root_name + '_' + field] = np.nan
         else:
-            self.missing_data += 4
-            self.where_missing_data.extend([
-                root_name+'.id', 
-                root_name+'.main', 
-                root_name+'.description', 
-                root_name+'.icon'
-            ])
-            return {
-                root_name + '_id': np.nan,
-                root_name + '_main': np.nan,
-                root_name + '_description': np.nan,
-                root_name + '_icon': np.nan
-            }
-    
-    def _get_base(self, root_name='base', error_value=404):
+            self.missing_data += max_errors
+            for field, field_type in fields.items():
+                self.where_missing_data.append(root_name+'.'+field)
+
+                if field_type in (float, int): 
+                    self._return_vals[root_name + '_' + field] = np.nan
+                else:
+                    self._return_vals[root_name + '_' + field] = ''
+        return self._return_vals
+        
+    def get_zero_level_item(self, root_name, error_value=None):
 
         k1 = self.data_raw.get(root_name, error_value)
 
         if isinstance(k1, str):
-            return {'base':k1}
+            self._return_vals[root_name] = k1
+            return self._return_vals
         else:
             self.missing_data += 1
             self.where_missing_data.append(root_name)
-            return {'base':k1}
-        
-    def _get_main(self, root_name="main", error_value=False):
+            self._return_vals = k1
+            return self._return_vals
 
-        k1 = self.data_raw.get(root_name, error_value)
+    def ingestion(self, data_sourse='Openweathermap'):
+        cols = {
+            'coord':1, 
+            'weather': -1, 
+            'base': 0, 
+            'main': 1, 
+            'visibility': 0, 
+            'wind': 1, 
+            'clouds': 1,
+            "sys": 1,
+            'timezone': 0, 
+            'id': 0, 
+            'name': 0,
+        }
+
+        fields = [
+            {'lon': float, 'lat': float},
+            {'id': int, 'main': str, 'description': str, 'icon': str},
+            {
+                'temp': float, 'feels_like': float, 'temp_min': float, 
+                'temp_max': float, 'pressure': int, 'humidity': int, 
+                'sea_level': int, 'grnd_level': int
+            },
+            {'speed': float, 'deg': int},
+            {'all': int},
+            {'type': int, 'id': int, 'country': str, 'sunrise': int, 'sunset': int}
+        ]
+
+        counter = 0
+        for col, method in cols.items():
+            if method == 1:
+                field = fields[counter]
+                self.get_first_level_items(root_name=col, fields=field)
+                counter += 1
+
+            elif method == -1:
+                field = fields[counter]
+                self.get_first_level_items_customlist(root_name=col, fields=field)
+                counter += 1
+            
+            else:
+                field = fields[counter]
+                self.get_zero_level_item(root_name=col)
+                counter += 1
+
+        return self._return_vals
+
+
+if __name__ == '__main__':
+    pass
+
+        # FILDS = {
+        #     'temp':float,
+        #     'feels_like':float,
+        #     'temp_min':float, 
+        #     'temp_max':float,
+        #     'pressure':float,
+        #     'humidity':float,
+        #     'sea_level':float, 
+        #     'grnd_level':float
+        # }
+
+        # main_vals = {}
+
 
         

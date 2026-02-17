@@ -2,7 +2,7 @@ import requests
 import json
 
 
-class ApiOpenWatherMap():
+class ApiOpenWeatherMap():
     def __init__(self, api_key, base_url="http://api.openweathermap.org/data/2.5/weather?", metric="metric"):
         self.key = api_key
         self.base_url = base_url
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     city_name = input("Enter city name : ")
     api_key = input("Enter api-key : ")
 
-    api_owm = ApiOpenWatherMap(api_key=api_key)
+    api_owm = ApiOpenWeatherMap(api_key=api_key)
     response, data = api_owm.get(city_name=city_name)
     
     for key, value in data.items():
