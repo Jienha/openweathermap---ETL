@@ -107,6 +107,7 @@ class OpenWeatherMapParser:
                 root_name + '_description': np.nan,
                 root_name + '_icon': np.nan
             }
-        
-
     
+    def _get_base(self, root_name='base', error_value=404):
+
+        k1 = self.data_raw.get(root_name, error_value)
