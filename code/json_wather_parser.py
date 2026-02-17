@@ -111,3 +111,16 @@ class OpenWeatherMapParser:
     def _get_base(self, root_name='base', error_value=404):
 
         k1 = self.data_raw.get(root_name, error_value)
+
+        if isinstance(k1, str):
+            return {'base':k1}
+        else:
+            self.missing_data += 1
+            self.where_missing_data.append(root_name)
+            return {'base':k1}
+        
+    def _get_main(self, root_name="main", error_value=False):
+
+        k1 = self.data_raw.get(root_name, error_value)
+
+        
