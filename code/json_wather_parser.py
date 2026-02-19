@@ -54,9 +54,9 @@ class OpenWeatherMapParser:
                 
                 k2 = k1[0]
 
-                for field in k2.items():
-
-                    if k2.get(field, error_value) != error_value and isinstance(k2.get(field), field_type):
+                for field in k2.keys():
+                    print(field)
+                    if k2.get(field, error_value) != error_value:
                         self._return_vals[root_name + '_' + field] = k2.get(field)
                     else:
                         self.missing_data += 1
