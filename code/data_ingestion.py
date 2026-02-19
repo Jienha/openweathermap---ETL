@@ -1,22 +1,27 @@
 import polars as pl
 from api_openweathermap import ApiOpenWeatherMap
 import json
+# import pandas as pd
 import time
 import datetime as dt
 from json_wather_parser import OpenWeatherMapParser
 
-city_name = input("Enter city name : ")
+city_name = [city.strip() for city in input("Enter city name : ").split(',')]
 api_key = input("Enter api-key : ")
 
-api = ApiOpenWeatherMap(api_key=api_key)
-api_response, api_data = api.get(city_name=city_name)
 
-print(api_data)
-# jdata = json.dumps(api_data, indent=4) # only for visualizzation:
-# print(jdata)
+print(city_name)
+N = 0
+data = []
+while N < 5:
+    for city in city_name:
+        api = ApiOpenWeatherMap(api_key=api_key)
+        api_response, api_data = api.get(city_name=city)
 
-# parser:
-parser = OpenWeatherMapParser(api_data)
-print()
-print(parser.ingestion())
-# print(parser._get_first_level_items(root_name=NAME, fields=FIELDS))
+        parser = OpenWeatherMapParser(api_data)
+        data.append(parser.ingestion())
+    N += 1
+    time.sleep(10)
+
+df = pl.DataFrame(data)
+print(df)

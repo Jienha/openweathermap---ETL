@@ -20,7 +20,6 @@ class OpenWeatherMapParser:
         if k1 != 0 and isinstance(k1, dict):
 
             for field, field_type in fields.items():
-
                 if isinstance(k1.get(field), field_type):
                     self._return_vals[root_name + '_' + field] = k1.get(field)
                 else:
@@ -55,7 +54,6 @@ class OpenWeatherMapParser:
                 k2 = k1[0]
 
                 for field in k2.keys():
-                    print(field)
                     if k2.get(field, error_value) != error_value:
                         self._return_vals[root_name + '_' + field] = k2.get(field)
                     else:
@@ -89,7 +87,7 @@ class OpenWeatherMapParser:
         else:
             self.missing_data += 1
             self.where_missing_data.append(root_name)
-            self._return_vals = k1
+            self._return_vals[root_name] = str(k1)
             return self._return_vals
 
     def ingestion(self, data_sourse='Openweathermap'):
@@ -106,6 +104,7 @@ class OpenWeatherMapParser:
             'id': 0, 
             'name': 0,
         }
+        
 
         fields = [
             {'lon': float, 'lat': float},
@@ -133,9 +132,7 @@ class OpenWeatherMapParser:
                 counter += 1
             
             else:
-                field = fields[counter]
                 self.get_zero_level_item(root_name=col)
-                counter += 1
 
         return self._return_vals
 
