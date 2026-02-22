@@ -24,7 +24,23 @@ for city in city_name:
     # time.sleep(1)
 
 df = pl.DataFrame(data)
-df.write_csv("nome_file.csv")
+
+print(df)
+
+import sqlite3
+
+db_path="db/flow_openweathermap.db"
+# conn = sqlite3.connect(db_path)
+conn_path = 'sqlite:///'+ db_path,
+# print(conn)
+# Carica il DataFrame sulla tabella specificata
+df.write_database(
+    table_name="meteo_table",
+    connection= 'sqlite:///'+ db_path,
+    if_table_exists="append"  # Crea la tabella se non esiste
+)
 
 
 
+df = pl.read_database_uri(query='select * from meteo_table', uri=db_path)
+print(df)
