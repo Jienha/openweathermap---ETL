@@ -1,0 +1,9 @@
+ingestion:
+  cities: [
+    Takayama,Kurashiki,Takamatsu,Miyazaki,Hakone,Kamakura,Yamagata,Shizuoka,Nagano,Toyama,Niigata,
+    Kagoshima,Oita,Kumamoto,Sendai,Iwaki,Asahikawa,Okayama,Fukuyama,Kōchi,Toyohashi,Gifu,Kashiwa,
+    Machida,Chiba,Funabashi,Utsunomiya,Maebashi,Nagaoka,Akita,Yamaguchi,Matsue,Suzuka,Kanoya
+  ]
+  key: 33359c4e6ea3af57c064722607c60854
+  timeout_seconds: 120
+  
